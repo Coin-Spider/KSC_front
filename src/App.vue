@@ -1,6 +1,6 @@
 <template>
   <div id="app">
-    <welocme_-login/>
+    <router-view/>
   </div>
 </template>
 

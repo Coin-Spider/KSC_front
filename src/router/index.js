@@ -1,31 +1,67 @@
-// 1. 定义路由组件.
-// 也可以从其他文件导入
-import Welocme_Login from "@/components/welocme_Login.vue";
-// 2. 定义一些路由
-// 每个路由都需要映射到一个组件。
-// 我们后面再讨论嵌套路由。
-const routes=[
-    {
-        path:'/',
-        component: Welocme_Login
-    }
-]
+import {createRouter, createWebHashHistory, createWebHistory} from "vue-router"
+import axios from "axios";
+import store from "@/store/index.js";
 
-// 3. 创建路由实例并传递 `routes` 配置
-// 你可以在这里输入更多的配置，但我们在这里
-// 暂时保持简单
-const router = VueRouter.createRouter({
-    // 4. 内部提供了 history 模式的实现。为了简单起见，我们在这里使用 hash 模式。
-    history: VueRouter.createWebHashHistory(),
-    routes, // `routes: routes` 的缩写
+const Home = () => import("@/components/Home.vue")
+const welcome_Login = () => import("@/components/welocme_Login.vue");
+const routes = [
+    {
+        path: "/",
+        name: "welcome",
+        component: welcome_Login,
+    },
+    {
+        path: "/home",
+        name: "home",
+        component: Home,
+        children:[
+        ]
+    },
+];
+
+const router = createRouter({
+    history: createWebHistory(),
+    routes,
+});
+router.beforeEach(async (to, form) => {
+    if (store.state.user.userId!==null&&store.state.user.userId!==0){
+        return true
+    }
+    const _u_id = localStorage.getItem("_u_id");
+    const _token = localStorage.getItem("_token");
+    if ((_u_id !==null&&_u_id!=="") && (_token!==null&&_token!=="")) {
+        console.log("本地有")
+        const response = await axios.get(`/User/chToken?userId=${parseInt(_u_id)}`);
+        if (response.data.messageCode === '200' || response.data.messageCode === '1') {
+            console.log("检测通过")
+            store.commit('setUser', response.data.body)
+            if (to.path === "/") {
+                console.log("开始跳转到主页")
+                return {path: "/home"}
+            } else {
+                console.log("通行")
+                return true
+            }
+        } else {
+            console.log("检测未通过")
+            if (to.path === "/") {
+                console.log("这是登录页")
+                return true
+            } else {
+                console.log("跳转到登录页")
+                return {path:"/"}
+            }
+        }
+    } else {
+        console.log("没有")
+        if (to.path === '/') {
+            console.log("这是登录页")
+            return true
+        } else {
+            console.log("跳转到登录页")
+            return {path:"/"}
+        }
+    }
 })
 
-// 5. 创建并挂载根实例
-const app = Vue.createApp({})
-//确保 _use_ 路由实例使
-//整个应用支持路由。
-app.use(router)
-
-app.mount('#app')
-
-// 现在，应用已经启动了！
+export default router
