@@ -12,7 +12,19 @@ const store=new Vuex.Store({
             role: "",
             onDate: "",
             picUrl:"",
+        },essay:{
+            essayId:0,
+            essayTittle:"",
+            onTime: 0,
+            typeId: 0,
+            typeContent: "",
+            userId: 0,
+            nickName: "",
+            userHead: "",
+            coverPath:"",
         },
+        essayList:[
+        ]
     },
     mutations:{
         setUser(state,user){
@@ -21,9 +33,17 @@ const store=new Vuex.Store({
             state.user.nickName=user.nickName;
             state.user.role=user.role;
             state.user.onDate=user.onDate;
-            state.user.picUrl="http://127.0.0.1:"+user.picUrl;
+            state.user.picUrl="http://1.14.204.162/img"+user.picUrl;
             localStorage.setItem("_u_id",user.userId);
             localStorage.setItem("_token",user.token);
+        },addEssay(state,essayList){
+            state.essayList=essayList
+            let ip="http://1.14.204.162/img"
+            for (let i=0;i<essayList.length;i++){
+                state.essayList[i].coverPath=ip+state.essayList[i].coverPath
+                state.essayList[i].userHead=ip+state.essayList[i].userHead
+            }
+            console.log(state.essayList)
         },
     }
 })

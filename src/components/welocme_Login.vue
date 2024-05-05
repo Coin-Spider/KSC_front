@@ -101,9 +101,10 @@ button:focus {
 
 <script>
 import axios from "axios";
-import {useRouter} from "vue-router";
+import {useRoute, useRouter} from "vue-router";
 import store from "@/store/index.js";
 import router from "@/router/index.js";
+import Router from "@/router/index.js";
 
 
 export default {
@@ -137,8 +138,17 @@ export default {
     const router_to = (path) => {
       router.push(path)
     }
+    const loadEssay=async function () {
+      console.log("开始加载")
+      const response = await axios.get('/Essay/Homing');
+      if (response.data.messageCode === '200' || response.data.messageCode === '1') {
+        store.commit('addEssay',response.data.body);
+      }
+      console.log("加载完成")
+    }
     return {
-      router_to
+      router_to,
+      loadEssay
     }
   },
   created() {
@@ -150,7 +160,8 @@ export default {
       axios.post("/User/Login", user).then((response) => {
         if (response.data.messageCode === '200' || response.data.messageCode === '1') {
           this.$store.commit('setUser', response.data.body)
-          this.router_to("/home")
+          window.location.reload()
+          // this.router_to("/home")
         } else {
           this.is_login_able = true
           this.login_error_message = response.data.body
